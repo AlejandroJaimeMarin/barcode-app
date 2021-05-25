@@ -1,12 +1,49 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import { Camera } from 'expo-camera';
 
 export default function App() {
+
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+  };
+
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Camera style={styles.camera}
+          barCodeScannerSettings={{barCodeTypes: [BarCodeScanner.Constants.BarCodeType.ean13],}}
+          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+      >
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+          >
+            <Text style={styles.text}> Volver </Text>
+          </TouchableOpacity>
+        </View>
+      </Camera>
+      {scanned && <Button title={'Volver a escanear'} onPress={() => setScanned(false)} />}
     </View>
   );
 }
@@ -14,8 +51,22 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    margin: 20,
+  },
+  button: {
+    flex: 1,
+    alignSelf: 'flex-end',
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 18,
+    color: 'white',
   },
 });
