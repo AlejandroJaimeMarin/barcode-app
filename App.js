@@ -8,10 +8,9 @@ import { Camera } from 'expo-camera';
 function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Home Screen</Text>
       <Button
-        title="Go to Details"
-        onPress={() => navigation.navigate('Details')}
+        title="Escanear"
+        onPress={() => navigation.navigate('Escáner')}
       />
     </View>
   );
@@ -48,8 +47,8 @@ function DetailsScreen({ navigation }) {
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
     >
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
+        <TouchableOpacity style={styles.button}
+          onPress={() => navigation.navigate('Inicio')}
         >
           <Text style={styles.text}> Volver </Text>
         </TouchableOpacity>
@@ -66,8 +65,8 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Details" component={DetailsScreen} />
+        <Stack.Screen name="Inicio" component={HomeScreen} />
+        <Stack.Screen name="Escáner" component={DetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
