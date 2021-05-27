@@ -4,6 +4,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Camera } from 'expo-camera';
+import * as SQLite from 'expo-sqlite';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
+
+
 
 function HomeScreen({ navigation }) {
   return (
@@ -61,10 +66,39 @@ function DetailsScreen({ navigation }) {
 
 const Stack = createStackNavigator();
 
+async function openDatabase() {
+  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+  }
+  await FileSystem.downloadAsync(
+    Asset.fromModule(require('./assets/db/test.db')).uri,
+    FileSystem.documentDirectory + 'SQLite/test.db'
+  );
+  return SQLite.openDatabase('test.db');
+}
+
+const db = openDatabase('test.db');
+
 function App() {
+
+  
+ /* useEffect(() => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS items (id INTEGER, nombreTarea TEXT)'
+      );
+      //tx.executeSql("insert into items (id, nombreTarea) values (?, ?)", ["Idprueba", "Textoprueba"]);
+      //tx.executeSql("insert into items (id, nombreTarea) values (?, ?)", ["Idprueba2", "Textoprueba2"]);
+      tx.executeSql("select * from Prueba", [], (_, { rows }) =>
+          console.log(rows._array)
+        );
+    })
+  }, [])*/
+  
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Inicio">
         <Stack.Screen name="Inicio" component={HomeScreen} />
         <Stack.Screen name="Escáner" component={DetailsScreen} />
       </Stack.Navigator>
