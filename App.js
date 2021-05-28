@@ -43,6 +43,7 @@ function DetailsScreen({ navigation }) {
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    buscarReferencia(data);
   };
 
   return (
@@ -66,7 +67,30 @@ function DetailsScreen({ navigation }) {
 
 const Stack = createStackNavigator();
 
-async function openDatabase() {
+function buscarReferencia(referencia){
+  //const referencia = "1";
+  console.log("Referencia: " + referencia);
+  /*db.transaction(tx => {
+    tx.executeSql('Select FROM Prueba WHERE id = ? ', [referencia]);
+  })*/
+  db.transaction((tx) => {
+    tx.executeSql(
+        'Select * FROM Prueba WHERE id = ?',
+        [referencia],
+        () => {
+            console.log("success");
+            //Ejemplo bueno 978020137962
+        },
+        () => {
+            console.log("failed");
+        }
+        
+     );
+    });
+}
+
+
+/*async function openDatabase() {
   if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
     await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
   }
@@ -75,20 +99,37 @@ async function openDatabase() {
     FileSystem.documentDirectory + 'SQLite/test.db'
   );
   return SQLite.openDatabase('test.db');
+}*/
+
+
+
+/**Versión no asíncrona */
+function openDatabase() {
+  if (!( FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+     FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+  }
+   FileSystem.downloadAsync(
+    Asset.fromModule(require('./assets/db/test.db')).uri,
+    FileSystem.documentDirectory + 'SQLite/test.db'
+  );
+  return SQLite.openDatabase('test.db');
 }
 
-const db = openDatabase('test.db');
+const db = openDatabase();
+
+
+
 
 function App() {
 
-  
- /* useEffect(() => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS items (id INTEGER, nombreTarea TEXT)'
-      );
-      //tx.executeSql("insert into items (id, nombreTarea) values (?, ?)", ["Idprueba", "Textoprueba"]);
-      //tx.executeSql("insert into items (id, nombreTarea) values (?, ?)", ["Idprueba2", "Textoprueba2"]);
+
+
+  /*db.then((value) => {
+    console.log(value);
+  });*/
+
+ /*useEffect(() => {
+  db.transaction(tx => {
       tx.executeSql("select * from Prueba", [], (_, { rows }) =>
           console.log(rows._array)
         );
