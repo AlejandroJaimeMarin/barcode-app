@@ -68,7 +68,7 @@ function DetailsScreen({ navigation }) {
 const Stack = createStackNavigator();
 
 function buscarReferencia(referencia){
-  //const referencia = "1";
+  //Refencia buena 9780201379624
   console.log("Referencia: " + referencia);
   /*db.transaction(tx => {
     tx.executeSql('Select FROM Prueba WHERE id = ? ', [referencia]);
@@ -77,15 +77,9 @@ function buscarReferencia(referencia){
     tx.executeSql(
         'Select * FROM Prueba WHERE id = ?',
         [referencia],
-        () => {
-            console.log("success");
-            //Ejemplo bueno 978020137962
-        },
-        () => {
-            console.log("failed");
-        }
-        
-     );
+        (_, { rows }) =>
+        console.log(rows) //Ojo que debes especificar que te devuelva el array solo y no todo el objeto del resulset
+        );
     });
 }
 
