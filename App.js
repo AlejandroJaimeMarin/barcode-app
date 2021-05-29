@@ -10,7 +10,7 @@ import { Asset } from 'expo-asset';
 
 
 
-function HomeScreen({ navigation }) {
+function PantallaInicio({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Button
@@ -21,7 +21,7 @@ function HomeScreen({ navigation }) {
   );
 }
 
-function DetailsScreen({ navigation }) {
+function PantallaEscaner({ navigation }) {
 
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
@@ -42,8 +42,9 @@ function DetailsScreen({ navigation }) {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-    buscarReferencia(data);
+    //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    navigation.navigate('Resultados de la búsqueda', data);
+    //buscarReferencia(data);
   };
 
   return (
@@ -65,23 +66,39 @@ function DetailsScreen({ navigation }) {
   );
 }
 
+function PantallaResultados({ route, navigation }) {
+
+  const [idProducto, setidProducto] = useState();
+  const itemId  = route.params;
+
+  function buscarReferencia(itemId){
+    //Refencia buena 9780201379624
+    //console.log("Referencia: " + referencia);
+    let test;
+  
+    db.transaction((tx) => {
+      tx.executeSql(
+          'Select * FROM Prueba WHERE id = ?',
+          [itemId],
+          (_, { rows }) =>
+          setidProducto(rows._array) //Ojo que debes especificar que te devuelva el array solo y no todo el objeto del resulset
+          );
+      });
+  }
+
+  buscarReferencia(itemId);
+  //console.log(resultado);
+
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>{JSON.stringify(idProducto)}</Text>
+    </View>
+  );
+}
+
 const Stack = createStackNavigator();
 
-function buscarReferencia(referencia){
-  //Refencia buena 9780201379624
-  console.log("Referencia: " + referencia);
-  /*db.transaction(tx => {
-    tx.executeSql('Select FROM Prueba WHERE id = ? ', [referencia]);
-  })*/
-  db.transaction((tx) => {
-    tx.executeSql(
-        'Select * FROM Prueba WHERE id = ?',
-        [referencia],
-        (_, { rows }) =>
-        console.log(rows) //Ojo que debes especificar que te devuelva el array solo y no todo el objeto del resulset
-        );
-    });
-}
+
 
 
 /*async function openDatabase() {
@@ -117,7 +134,6 @@ const db = openDatabase();
 function App() {
 
 
-
   /*db.then((value) => {
     console.log(value);
   });*/
@@ -134,8 +150,9 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Inicio">
-        <Stack.Screen name="Inicio" component={HomeScreen} />
-        <Stack.Screen name="Escáner" component={DetailsScreen} />
+        <Stack.Screen name="Inicio" component={PantallaInicio} />
+        <Stack.Screen name="Escáner" component={PantallaEscaner} />
+        <Stack.Screen name="Resultados de la búsqueda" component={PantallaResultados} />
       </Stack.Navigator>
     </NavigationContainer>
   );
