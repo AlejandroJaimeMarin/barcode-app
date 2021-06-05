@@ -25,6 +25,7 @@ function PantallaEscaner({ navigation }) {
 
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+  const [idProducto, setidProducto] = useState();
 
   useEffect(() => {
     (async () => {
@@ -39,13 +40,15 @@ function PantallaEscaner({ navigation }) {
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
   }
+ 
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+
     navigation.navigate('Resultados de la búsqueda', data);
     //buscarReferencia(data);
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -71,34 +74,28 @@ function PantallaResultados({ route, navigation }) {
   const [idProducto, setidProducto] = useState();
   const itemId  = route.params;
 
-  function buscarReferencia(itemId){
-    //Refencia buena 9780201379624
-    //console.log("Referencia: " + referencia);
-    let test;
+
+    useEffect(() => {
+      db.transaction(tx => {
+          tx.executeSql('Select * FROM productos WHERE id = ?', [itemId], (_, { rows }) =>
+          setidProducto(rows.item(0).nombre)
+            );
+        })
+    }, [])
+
   
-    db.transaction((tx) => {
-      tx.executeSql(
-          'Select * FROM Prueba WHERE id = ?',
-          [itemId],
-          (_, { rows }) =>
-          setidProducto(rows._array) //Ojo que debes especificar que te devuelva el array solo y no todo el objeto del resulset
-          );
-      });
-  }
+    //Refencia buena 9780201379624
+    //Refencia buena 8780201379625
 
-  buscarReferencia(itemId);
-  //console.log(resultado);
-
+    
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>{JSON.stringify(idProducto)}</Text>
+      <Text>{idProducto}</Text>
     </View>
   );
 }
 
 const Stack = createStackNavigator();
-
-
 
 
 /*async function openDatabase() {
@@ -120,10 +117,10 @@ function openDatabase() {
      FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
   }
    FileSystem.downloadAsync(
-    Asset.fromModule(require('./assets/db/test.db')).uri,
-    FileSystem.documentDirectory + 'SQLite/test.db'
+    Asset.fromModule(require('./assets/db/productos.db')).uri,
+    FileSystem.documentDirectory + 'SQLite/productos.db'
   );
-  return SQLite.openDatabase('test.db');
+  return SQLite.openDatabase('productos.db');
 }
 
 const db = openDatabase();
@@ -131,8 +128,7 @@ const db = openDatabase();
 
 
 
-function App() {
-
+export default function App() {
 
   /*db.then((value) => {
     console.log(value);
@@ -182,4 +178,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
