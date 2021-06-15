@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useIsFocused } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -26,13 +26,15 @@ function PantallaEscaner({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [idProducto, setidProducto] = useState();
+  const isFocused = useIsFocused(); //La camara se tiene que volver a montar cuando se cambia de pantalla
+
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestPermissionsAsync();
       setHasPermission(status === 'granted');
-    })();
-  }, []);
+      })();
+    }, []);
 
   if (hasPermission === null) {
     return <View />;
@@ -43,16 +45,16 @@ function PantallaEscaner({ navigation }) {
  
 
   const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
+    //setScanned(true);
     //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
 
     navigation.navigate('Resultados de la búsqueda', data);
     //buscarReferencia(data);
   }
-
+  console.log(scanned);
   return (
     <View style={styles.container}>
-    <Camera style={styles.camera}
+    {isFocused && <Camera style={styles.camera}
         barCodeScannerSettings={{barCodeTypes: [BarCodeScanner.Constants.BarCodeType.ean13],}}
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
     >
@@ -63,7 +65,7 @@ function PantallaEscaner({ navigation }) {
           <Text style={styles.text}> Volver </Text>
         </TouchableOpacity>
       </View>
-    </Camera>
+    </Camera>}
     {scanned && <Button title={'Volver a escanear'} onPress={() => setScanned(false)} />}
   </View>
   );
@@ -91,6 +93,11 @@ function PantallaResultados({ route, navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>{idProducto}</Text>
+      <TouchableOpacity style={styles.button}
+          onPress={() => navigation.navigate('Escáner')}
+        >
+          <Text style={styles.text}> Volver a escanear </Text>
+        </TouchableOpacity>
     </View>
   );
 }
@@ -148,7 +155,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Inicio">
         <Stack.Screen name="Inicio" component={PantallaInicio} />
         <Stack.Screen name="Escáner" component={PantallaEscaner} />
-        <Stack.Screen name="Resultados de la búsqueda" component={PantallaResultados} />
+        <Stack.Screen name="Resultados de la búsqueda" component={PantallaResultados}  />
       </Stack.Navigator>
     </NavigationContainer>
   );
