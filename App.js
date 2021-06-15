@@ -51,7 +51,7 @@ function PantallaEscaner({ navigation }) {
     navigation.navigate('Resultados de la búsqueda', data);
     //buscarReferencia(data);
   }
-  console.log(scanned);
+  
   return (
     <View style={styles.container}>
     {isFocused && <Camera style={styles.camera}
@@ -66,7 +66,7 @@ function PantallaEscaner({ navigation }) {
         </TouchableOpacity>
       </View>
     </Camera>}
-    {scanned && <Button title={'Volver a escanear'} onPress={() => setScanned(false)} />}
+    
   </View>
   );
 }
