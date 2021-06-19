@@ -78,11 +78,33 @@ function PantallaResultados({ route, navigation }) {
 
 
     useEffect(() => {
-      db.transaction(tx => {
+
+      async function openDatabase() {
+        if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+          await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+        }
+        await FileSystem.downloadAsync(
+          Asset.fromModule(require('./assets/db/productos.db')).uri,
+          FileSystem.documentDirectory + 'SQLite/productos.db'
+        );
+        return SQLite.openDatabase('productos.db');
+      }
+      
+      async function showResults(){
+        
+        const db = await openDatabase();
+
+        db.transaction(tx => {
           tx.executeSql('Select * FROM productos WHERE id = ?', [itemId], (_, { rows }) =>
           setidProducto(rows.item(0).nombre)
             );
         })
+
+      }
+
+      showResults();
+      
+      
     }, [])
 
   
@@ -105,21 +127,9 @@ function PantallaResultados({ route, navigation }) {
 const Stack = createStackNavigator();
 
 
-/*async function openDatabase() {
-  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
-    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-  }
-  await FileSystem.downloadAsync(
-    Asset.fromModule(require('./assets/db/test.db')).uri,
-    FileSystem.documentDirectory + 'SQLite/test.db'
-  );
-  return SQLite.openDatabase('test.db');
-}*/
-
-
 
 /**Versión no asíncrona */
-function openDatabase() {
+/*function openDatabase() {
   if (!( FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
      FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
   }
@@ -130,7 +140,7 @@ function openDatabase() {
   return SQLite.openDatabase('productos.db');
 }
 
-const db = openDatabase();
+const db = openDatabase();*/
 
 
 
